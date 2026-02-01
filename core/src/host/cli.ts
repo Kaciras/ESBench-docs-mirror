@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import nodeModule from "node:module";
 import process from "node:process";
 import { importCWD } from "@kaciras/utilities/node";
