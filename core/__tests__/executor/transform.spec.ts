@@ -86,8 +86,12 @@ describe("transformer", () => {
 	instance.adapter = mockAdapter;
 
 	it("should not parse imports if transform disabled", () => {
-		expect(transformer.parse("root", "/index.js")).toBeUndefined();
-		expect(transformer.parse("root", "/@fs/foo.js")).toBeUndefined();
+		// Vitest add `--experimental-import-meta-resolve` to worker processes, but its not Node's default.
+		const noImportMetaResolve = Object.create(transformer) as typeof transformer;
+		noImportMetaResolve.adapter = null;
+
+		expect(noImportMetaResolve.parse("root", "/index.js")).toBeUndefined();
+		expect(noImportMetaResolve.parse("root", "/@fs/foo.js")).toBeUndefined();
 	});
 
 	it.each([
