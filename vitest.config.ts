@@ -8,17 +8,13 @@ export default defineConfig({
 	test: {
 		// Some tests are depend on execution time,
 		// so we disabled threads to improve accuracy.
-		poolOptions: {
-			threads: {
-				singleThread: true,
-			},
-		},
+		maxWorkers: 1,
 		pool: "threads",
 		coverage: {
 			reporter: ["lcovonly"],
 			provider: "v8",
 		},
-		restoreMocks: true,
+		mockReset: true,
 		include: ["**/__tests__/**/*.spec.ts"],
 	},
 });

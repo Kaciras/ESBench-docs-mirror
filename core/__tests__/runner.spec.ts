@@ -9,7 +9,9 @@ vi.mock("./../src/profiling.ts", async importOriginal => {
 	const module = await importOriginal<any>();
 	return {
 		...module,
-		ProfilingContext: vi.fn((...args) => new module.ProfilingContext(...args)),
+		ProfilingContext: vi.fn(function (...args) {
+			return new module.ProfilingContext(...args);
+		}),
 	};
 });
 
@@ -17,11 +19,11 @@ const contextFactory = ProfilingContext as Mock;
 const emptySuite = defineSuite({ setup: noop });
 
 it("should return the result", async () => {
-	contextFactory.mockReturnValue({
-		run: async () => {},
-		notes: [],
-		meta: { time: {} },
-		scenes: [{}, {}],
+	contextFactory.mockImplementation(class {
+		notes = [];
+		meta = { time: {} };
+		scenes = [{}, {}];
+		run = async () => {};
 	});
 	const result = await runSuite({
 		params: {
@@ -49,7 +51,9 @@ it("should return the result", async () => {
 });
 
 it("should create a ProfilingContext", async () => {
-	contextFactory.mockReturnValue({ run: async () => {} });
+	contextFactory.mockImplementation(class {
+		run = async () => {};
+	});
 	const options = { log: vi.fn(), pattern: /foo/ };
 
 	await runSuite(emptySuite, options);
@@ -75,7 +79,7 @@ it("should call lifecycle hooks", async () => {
 		invocations.push(run);
 		throw new Error("Stub Error");
 	};
-	contextFactory.mockReturnValue({ run });
+	contextFactory.mockImplementation(class { run = run; });
 
 	const running = runSuite({ beforeAll, afterAll, setup() {} });
 
@@ -107,8 +111,10 @@ it("should not check baseline that uses variable outside client", async () => {
 });
 
 it("should resolve built-in profilers", async () => {
-	contextFactory.mockReturnValue({ run: async () => {} });
 	const profiler1 = {};
+	contextFactory.mockImplementation(class {
+		run = async () => {};
+	});
 
 	await runSuite({
 		setup() {},
