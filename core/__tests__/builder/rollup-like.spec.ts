@@ -1,6 +1,5 @@
-import { mkdtempSync, readFileSync } from "node:fs";
+import { mkdtempDisposableSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { tmpdir } from "node:os";
 import { pathToFileURL } from "node:url";
 import { NormalizedInputOptions } from "rollup";
 import { expect, it, vi } from "vitest";
@@ -8,13 +7,13 @@ import { UserConfig } from "vite";
 import { RollupBuilder, ViteBuilder } from "../../src/builder/rollup-like.ts";
 import { Builder } from "../../src/host/index.ts";
 
-const directory = mkdtempSync(join(tmpdir(), "esbench-"));
-
 async function testBundle(builder: Builder) {
-	const file = "./__tests__/fixtures/no-case.js";
-	await builder.build(directory, [file]);
+	using directory = mkdtempDisposableSync("esbench-");
 
-	const url = pathToFileURL(join(directory, "index.js"));
+	const file = "./__tests__/fixtures/no-case.js";
+	await builder.build(directory.path, [file]);
+
+	const url = pathToFileURL(join(directory.path, "index.js"));
 	const module = await import(url.href);
 
 	const postMessage = vi.fn();
